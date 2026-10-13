@@ -1,0 +1,7 @@
+requests
+python-dotenv
+logfire
+langgraph
+langchain-groq
+pandas
+ipykernel
