@@ -11,7 +11,6 @@ import logging
 import os
 from datetime import datetime
 
-import groq
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
 
@@ -74,7 +73,7 @@ def add_to_calendar(email: dict) -> dict:
     """
     settings = get_settings()
     msg_id = email["message_id"]
-    title = email.get("event_title") or ""
+    title = email.get("event_title")
 
     entries = read_json_list(settings.calendar_path)
 
@@ -87,7 +86,7 @@ def add_to_calendar(email: dict) -> dict:
     entry = {
         "message_id": msg_id,
         "title": title,
-        "date": str(email.get("event_date") or ""),
+        "date": email.get("event_date"),
         "time": email.get("event_time"),
         "location": email.get("event_location"),
         "added_at": datetime.now().isoformat(),
@@ -95,7 +94,7 @@ def add_to_calendar(email: dict) -> dict:
     entries.append(entry)
     write_json_list(settings.calendar_path, entries)
     logger.info("add_to_calendar: added '%s' on %s", title, entry["date"])
-    return entry
+    return {"saved": True}
 
 
 def add_todo(email: dict) -> dict:
@@ -108,15 +107,9 @@ def add_todo(email: dict) -> dict:
     settings = get_settings()
     msg_id = email["message_id"]
 
-    # todo_items is stored as a JSON string in the DB
-    raw = email.get("todo_items") or "[]"
-    if isinstance(raw, str):
-        try:
-            tasks = json.loads(raw)
-        except Exception:
-            tasks = []
-    else:
-        tasks = list(raw)
+    tasks = json.loads(email.get("todo_items") or "[]")
+    if not isinstance(tasks, list):
+        raise ValueError("todo_items must contain a JSON list")
 
     existing = read_json_list(settings.todo_path)
     # Build a set of (message_id, text) pairs already in the file for fast lookup
@@ -130,7 +123,7 @@ def add_todo(email: dict) -> dict:
         item = {
             "message_id": msg_id,
             "text": text,
-            "due_date": str(email.get("due_date") or ""),
+            "due_date": email.get("due_date"),
             "due_time": email.get("due_time"),
             "priority": email.get("priority"),
             "status": "open",
@@ -159,7 +152,7 @@ def archive(email: dict) -> dict:
     # Resolve the live Mailpit ID (the stored one can be stale after reseeding)
     mailpit_id = find_mailpit_id(msg_id)
     if mailpit_id is None:
-        raise ValueError(f"message not found in Mailpit: {msg_id}")
+        raise ValueError("message not found in Mailpit")
 
     tag_message(mailpit_id, "Archive")
     mark_read(mailpit_id)
@@ -175,7 +168,7 @@ def archive(email: dict) -> dict:
     write_json_list(settings.mail_actions_path, items)
 
     logger.info("archive: archived message_id=%s", msg_id)
-    return record
+    return {"archived": True}
 
 
 def mark_spam(email: dict) -> dict:
@@ -189,7 +182,7 @@ def mark_spam(email: dict) -> dict:
 
     mailpit_id = find_mailpit_id(msg_id)
     if mailpit_id is None:
-        raise ValueError(f"message not found in Mailpit: {msg_id}")
+        raise ValueError("message not found in Mailpit")
 
     tag_message(mailpit_id, "Junk")
     mark_read(mailpit_id)
@@ -205,7 +198,7 @@ def mark_spam(email: dict) -> dict:
     write_json_list(settings.mail_actions_path, items)
 
     logger.info("mark_spam: marked junk message_id=%s", msg_id)
-    return record
+    return {"marked_spam": True}
 
 
 def unsubscribe(email: dict) -> dict:
@@ -233,11 +226,12 @@ def unsubscribe(email: dict) -> dict:
     write_json_list(settings.mail_actions_path, items)
 
     logger.info("unsubscribe: recorded mock unsubscribe for sender '%s'", sender)
-    return record
+    return {"saved": True}
 
 
 def pay_bill(email: dict) -> dict:
     """Not implemented — raises so the node records status 'not_implemented'."""
+    logger.info("pay_bill: not implemented for '%s'", email.get("subject", ""))
     raise NotImplementedError("pay_bill is not implemented yet")
 
 
@@ -260,7 +254,7 @@ def draft_reply(email: dict) -> dict:
     for draft in drafts:
         if draft.get("message_id") == msg_id:
             logger.info("draft_reply: draft already exists for '%s', skipping", subject)
-            return {"saved": False, "reason": "already exists"}
+            return {"skipped": "duplicate"}
 
     # Build the human message: user name, summary, and the delimited email body
     body = email.get("body") or ""
@@ -281,7 +275,6 @@ def draft_reply(email: dict) -> dict:
     llm = ChatGroq(
         model=settings.groq_model,
         temperature=0.3,
-        groq_api_key=settings.groq_api_key or None,
     )
     messages = [
         SystemMessage(content=DRAFT_SYSTEM_PROMPT),
