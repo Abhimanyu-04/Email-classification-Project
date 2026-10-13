@@ -1,6 +1,7 @@
 import logging
-from email_agent.email_store import email_exists, save_email
-from email_agent.mail_client import get_message, list_messages
+
+from email_assistant.mail.client import get_message, list_messages
+from email_assistant.storage.email_store import email_exists, save_email
 
 logger = logging.getLogger(__name__)
 

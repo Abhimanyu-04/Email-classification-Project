@@ -1,7 +1,8 @@
 import logging
 import os
 import sqlite3
-from config import get_settings
+
+from email_assistant.config import get_settings
 
 logger = logging.getLogger(__name__)
 

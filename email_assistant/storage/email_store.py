@@ -1,7 +1,8 @@
 import json
 import logging
 from datetime import datetime
-from database import get_connection
+
+from email_assistant.database import get_connection
 
 logger = logging.getLogger(__name__)
 

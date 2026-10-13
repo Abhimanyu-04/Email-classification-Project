@@ -1,6 +1,8 @@
 import logging
+
 import logfire
-from config import get_settings
+
+from email_assistant.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,5 +27,12 @@ def setup_logging() -> None:
         ],
         force=True,
     )
+
+    cli_logger = logging.getLogger("cli")
+    cli_logger.setLevel(logging.INFO)
+    if not cli_logger.handlers:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(logging.Formatter("%(message)s"))
+        cli_logger.addHandler(console_handler)
 
     logger.info("Logging is initialised.")

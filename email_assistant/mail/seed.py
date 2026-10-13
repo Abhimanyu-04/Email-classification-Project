@@ -4,8 +4,9 @@ import smtplib
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 import requests
-from config import get_settings
-from logging_setup import setup_logging
+
+from email_assistant.config import get_settings
+from email_assistant.logging_setup import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +266,24 @@ def build_email_list(user_email: str) -> list[dict]:
                 "Google Security Team"
             ),
         },
+        # 18. Father Health update
+        # {
+        #     "sender": "sunil@google.com",
+        #     "subject": "Health update regarding father",
+        #     "body": (
+        #         "Hi Abhimanyu,\n"
+        #         "Father is doing well. His doctor asked me to send the report by tomorrow, could you please share the reports."
+        #     ),
+        # },
+        # # 19. Mother Health update
+        # {
+        #     "sender": "sunil@google.com",
+        #     "subject": "Health update regarding father",
+        #     "body": (
+        #         "Hi Abhimanyu,\n"
+        #         "Mother is doing well. His doctor asked me to send the report by tomorrow, could you please share the reports."
+        #     ),
+        # },
     ]
 
     # Assign fixed Message-IDs <seed-01@example.com> through <seed-17@example.com>
