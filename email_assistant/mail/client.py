@@ -1,6 +1,8 @@
 import logging
+
 import requests
-from config import get_settings
+
+from email_assistant.config import get_settings
 
 logger = logging.getLogger(__name__)
 

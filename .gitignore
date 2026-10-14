@@ -1,65 +1,31 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.bin/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environments
-venv/
-ENV/
-env/
-
-# Environment variables & secrets
+# Local secrets; keep the example template tracked.
 .env
 .env.*
 !.env.example
 
-# Local databases and SQLite files
+# Runtime database and generated application data.
+data/
 *.db
-*.db-shm
-*.db-wal
-data/*.db
-data/*.json
+*.db-*
+*.sqlite
+*.sqlite3
 
-# Logs
+# Python bytecode and virtual environments.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Notebook checkpoints.
+.ipynb_checkpoints/
+
+# Local logs and build artifacts.
 *.log
+build/
+dist/
+*.egg-info/
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-
-# OS specific files
+# Operating-system metadata.
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-
-# IDEs and Editors
-.vscode/
-.idea/
-*.swp
-*.swo
